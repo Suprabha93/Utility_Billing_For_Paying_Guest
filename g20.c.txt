@@ -1,0 +1,407 @@
+/*********************************************************************************************
+*File name    :g20.c
+*Description :This program gives the details of all paying guest and
+	      generate the bill for each paying guest.
+*Author      :Suprabha.S.Hegde,Yashaswini.H,Tarana.
+*Date        :25-July-2014.
+*Peer Review by: Poornima.R.Bhat,Swathi.N,Paapiya.
+*Faculty Review: Ranjitha 
+**********************************************************************************************/
+
+
+
+
+
+#include<stdio.h>
+#include<string.h>
+#include<stdlib.h>
+#include<conio.h>
+
+void fnAdmin();
+void fnPayingGuest();
+void fnCreateRecord();
+void fnDisplayRecord();
+void fnPaymentDetails();
+void fnSearchRecord();
+
+
+
+
+
+/************************************************************************
+*Function:main()
+*Description:The option takes the choice entered by user to respective
+*            sub menu.
+*Input parameter: None
+*Returns :Returns no value
+************************************************************************/
+
+void main()
+{
+int ch;
+clrscr();
+
+	    while(1)
+    {
+	clrscr();
+	printf("\t\t........................................................\t\n");
+	printf("\t\t............WELCOME TO PAYING GUEST ACCOMODATION........\t\n");
+	printf("\t\t........................................................\t\n");
+	printf("\n\n\tSelect The option\n");
+	printf("\t1.Admin\n\t2.Paying Guest\n\t3.exit\n");
+	scanf("%d",&ch);
+	switch(ch)
+	 {
+		case 1:
+			 fnAdmin();
+			 break;
+		case 2:
+			 printf("\n\t\t.........WELCOME GUEST.......\t\t\n");
+			 fnPayingGuest();
+			 break;
+		case 3:
+			 printf("..................BYE!..............");
+			 getch();
+			 exit(0);
+			 break;
+		default:
+			 exit(0);
+	}
+       getch();
+}    }
+
+
+/**********************************************************************
+*Structure:       node
+*Description:     Stores the information of paying guest.
+*Member Variables:Pgid -Paying guest ID
+*		  Pg_fname,Pg_lname-Paying Guest's first and last name
+*		  Date of birth,Date of check in,Area(place) and mobile number.
+*		  
+***********************************************************************/
+
+
+struct node
+{
+int Pg_id;
+char Pg_fname[30],Pg_lname[30];
+struct{int date,month;int year;}dob;
+struct{int date,month;int year;}doc;
+char Per_adr[100];
+char mobile_no[10];
+struct node *left;
+struct node *right;
+};
+
+struct node *first=NULL;
+
+struct node *getnode()
+{
+       struct node *newnode;
+       newnode=(struct node *)malloc(sizeof(struct node)); //dynamic allocation
+	if(newnode==NULL)
+	  {
+	   printf("\nError");
+	   return (NULL);
+	  }
+	printf("Enter a four digit PGID:\n");
+	scanf("%d",&newnode->Pg_id);
+	printf("Enter the Paying Guest First Name:\n");
+	scanf("%s",newnode->Pg_fname);
+	printf("Enter the Paying Guest Last Name:\n");
+	scanf("%s",newnode->Pg_lname);
+	printf("Enter Date of Birth(dd/mm/yyyy):\n");
+	scanf("%d%d%d",&newnode->dob.date,&newnode->dob.month,&newnode->dob.year);
+	while(((newnode->dob.date)>31)||((newnode->dob.month)>12)||((newnode->dob.year)>2014))
+	{
+	printf("Enter proper Date of birth(dd/mm/yyyy):\n");
+	scanf("%d%d%d",&newnode->dob.date,&newnode->dob.month,&newnode->dob.year);
+	}
+	printf("Enter Date of Check_in(dd/mm/yyyy):\n");
+	scanf("%d%d%d",&newnode->doc.date,&newnode->doc.month,&newnode->doc.year);
+	while(((newnode->doc.date)>31)||((newnode->doc.month)>12)||((newnode->doc.year)>2015))
+	{
+	printf("Enter proper Date of Check_in(dd/mm/yyyy):\n");
+	scanf("%d%d%d",&newnode->doc.date,&newnode->doc.month,&newnode->doc.year);
+	}
+	printf("Enter Pg's  place(area):\n");
+	scanf("%s",&newnode->Per_adr);
+	printf("Enter your mobile number(ten digit):\n");
+	scanf("%s",&newnode->mobile_no);
+	while((strlen(newnode->mobile_no)>10)||(strlen(newnode->mobile_no)<10))
+	{
+	printf("Enter ten digit number:\n");
+	scanf("%s",&newnode->mobile_no);
+	}
+	newnode->left=NULL;
+	newnode->right=NULL;
+	return newnode;
+
+}
+
+
+/************************************************************************
+*Function:fnCreateRecord()
+*Description:Creates a new record everytime a user adds a record
+*          
+*Input parameter: None
+*Returns :  Returns no value
+************************************************************************/
+
+void fnCreateRecord()
+{
+FILE *fp;
+
+struct node *newnode;
+
+if((newnode=getnode())==NULL) //calls getnode();
+
+return;
+
+if(first!=NULL)
+
+first->left=newnode;
+
+newnode->right=first;
+
+first=newnode;
+fp=fopen("file.txt","a"); //file opened in append mode
+if(fp==NULL)
+printf("ERROR\n");
+else if(ferror(fp)!=0)
+printf("No file\n");
+else
+{
+  fprintf(fp,"\t%d\t%s\t%s\n",newnode->Pg_id,newnode->Pg_fname,newnode->Pg_lname);
+  fprintf(fp,"%d\t%d\t%d\n%d\t%d\t%d\n%s\n",newnode->dob.date,newnode->dob.month,newnode->dob.year,newnode->doc.date,newnode->doc.month,newnode->doc.year,newnode->mobile_no);
+  fclose(fp); //close the file
+}
+}
+
+
+
+/************************************************************************
+*Function:fnDisplayRecord()
+*Description:Displays the details of Paying Guest
+*
+*Input parameter: None
+*Returns :  Returns no value
+************************************************************************/
+
+void fnDisplayRecord()
+{
+FILE *fp;
+struct node *newnode;
+fp=fopen("file.txt","r");  //file opened in read mode
+if(fp==NULL)
+printf("ERROR\n");
+else if(ferror(fp)!=0)
+printf("No file\n");
+else
+{
+
+	printf("\n.................RECORDS...............\n");
+	while(!feof(fp))
+   {
+	 fscanf(fp,"\t%d\t%s\t%s\n",&newnode->Pg_id,newnode->Pg_fname,newnode->Pg_lname);
+	 fscanf(fp,"%d\t%d\t%d\n%d\t%d\t%d\n%s\n",&newnode->dob.date,&newnode->dob.month,&newnode->dob.year,&newnode->doc.date,&newnode->doc.month,&newnode->doc.year,newnode->mobile_no);
+	 printf("Pg-id:%d\tPg's first name:%s\tPg's last name:%s\n",newnode->Pg_id,newnode->Pg_fname,newnode->Pg_lname);
+	 printf("DOB:%d\t%d\t%d\nDate of check in:%d\t%d\t%d\nMobile no:%s\n\n\n",newnode->dob.date,newnode->dob.month,newnode->dob.year,newnode->doc.date,newnode->doc.month,newnode->doc.year,newnode->mobile_no);
+
+
+  }
+ }
+
+fclose(fp); //close the file
+getch();
+}
+
+
+
+/************************************************************************
+*Function:fnPayingGuest()
+*Description:The option takes the choice entered by user to respective
+*            sub menu.
+*Input parameter: None
+*Returns :  Returns no value
+************************************************************************/
+
+
+
+
+void fnPayingGuest()
+{  int choice;
+    while(1)
+    {
+    printf("Select the choice\n");
+    printf("\t\t 1:view pg details\n");
+    printf("\t\t 2:view monthly bill\n");
+    printf("\t\t 3:main\n");
+    scanf("%d",&choice);
+    switch(choice)
+    {
+
+    case 1:
+    fnSearchRecord();
+    break;
+    case 2:
+    fnPaymentDetails();
+    break;
+   case 3:
+    main();
+    break;
+    }
+    }
+     }
+
+
+
+
+/************************************************************************
+*Function:fnAdmin()
+*Description:The option takes the choice entered by user to respective
+*            sub menu.
+*Input parameter: None
+*Returns :  Returns no value
+************************************************************************/
+
+void fnAdmin()
+{
+int op,temp_id;
+clrscr();
+	while(1)
+	       {
+		 printf("\n\t\t\t.........WELCOME ADMIN.......\t\t\n");
+		 printf("\n\tSelect the choice");
+		 printf("\n\t1.New Record\n\t2.View Record\n\t3.Payement details\n\t4.Search Record\n\t5.Go back to main menu\n\t6.Exit\n");
+		 scanf("%d",&op);
+		 clrscr();
+			 switch(op)
+				  {
+				     case 1:
+					     printf("\nKindly Enter the following details\n");
+					     fnCreateRecord();
+					     break;
+				     case 2:
+					     printf("\nHere are the records of people who have been availed the accomodation\n");
+					     fnDisplayRecord();
+					     break;
+				     case 3:
+					    fnPaymentDetails();
+					    break;
+				     case 4:
+
+					    fnSearchRecord();
+					    break;
+				    case 5:
+					   main();
+					   break;
+				    case 6:
+					   exit(0);
+				    default:
+					    printf("You entered wrong option:\n");
+					    fnAdmin();
+				  }
+	       }
+}
+
+
+
+
+/************************************************************************
+*Function:fnSearchRecord()
+*Description:Searches for the PGID mentioned,displays Success else
+*no record found.            
+*Input parameter: None
+*Returns :  Returns no value
+************************************************************************/
+
+void fnSearchRecord()
+ {
+   FILE *fp;
+   int flag=0;
+   struct node *newnode;
+   int temp;
+   fp=fopen("file.txt","r"); //open the file in read mode
+   if(fp==NULL)
+   printf("File could not be opened");
+   else if(ferror(fp)!=0)
+   printf("An error occured while opening the file\n");
+   else
+   {
+   printf("Enter the PGID:\n");
+   scanf("%d",&temp);
+    while(!feof(fp))
+    {
+	 fscanf(fp,"\t%d\t%s\t%s\n",&newnode->Pg_id,newnode->Pg_fname,newnode->Pg_lname);
+	 fscanf(fp,"%d\t%d\t%d\n%d\t%d\t%d\n%s\n",&newnode->dob.date,&newnode->dob.month,&newnode->dob.year,&newnode->doc.date,&newnode->doc.month,&newnode->doc.year,newnode->mobile_no);
+
+     if((newnode->Pg_id)==temp)
+     {
+      printf("\nrecord found\n");
+      printf("Pg-id:%d\tPg's first name:%s\tPg's last name:%s\n",newnode->Pg_id,newnode->Pg_fname,newnode->Pg_lname);
+      printf("DOB:%d\t%d\t%d\nDate of check in:%d\t%d\t%d\nMobile no:%s\n\n\n",newnode->dob.date,newnode->dob.month,newnode->dob.year,newnode->doc.date,newnode->doc.month,newnode->doc.year,newnode->mobile_no);
+      flag++;
+      break;
+
+     }
+}
+     if(flag==0)
+
+     {
+      printf("record not found");
+     }
+
+    fclose(fp); //close the file
+    getch();
+   }
+ }
+
+
+
+
+/************************************************************************
+*Function:fnPaymentDetails()
+*Description:Calculates the total bill as per the number of months stayed.
+*            
+*Input parameter: None
+*Returns :  Returns no value
+************************************************************************/
+
+void fnPaymentDetails()
+{
+int month=0;
+int c1;
+double total=0;
+clrscr();
+printf("\t\t******Payment Details for one month******\n");
+printf("Lodging fee:Rs.2,000\n");
+printf("Food Bill:Rs.1,000\n");
+printf("Water Bill:Rs.100\n");
+printf("Electricity Bill:Rs.100\n");
+printf("Parking fee:Rs.50\n");
+printf("\t 1:TOTAL(For both accomodation and food)\n");
+printf("\t 2:TOTAL(For accomodation only)\n");
+printf("enter the choice\n");
+scanf("%d",&c1);
+
+switch(c1)
+{
+case 1:
+printf("How many months do you like to reside\n");
+scanf("%d",&month);
+total=month * 3250;
+printf("Total bill for %d months is Rs.%lf\n",month,total);
+break;
+case 2:
+printf("How many months do you like to reside\n");
+scanf("%d",&month);
+total=month * 2250;
+printf("Total bill for %d months is Rs.%lf\n",month,total);
+break;
+default:
+fnPaymentDetails();
+break;
+}
+getch();
+}
